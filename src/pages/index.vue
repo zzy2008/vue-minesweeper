@@ -3,7 +3,11 @@ import { isDev, toggleDev } from '~/composables'
 import { GamePlay } from '~/composables/logic'
 
 const play = new GamePlay(12, 12)
-const state = play.state
+useStorage('vueminesweeper-state', play.state)
+const state = computed(() => play.board)
+watchEffect(() => {
+  play.checkGameState()
+})
 </script>
 
 <template>
@@ -12,8 +16,7 @@ const state = play.state
   <div p5 @contextmenu.prevent>
     <div v-for="row, x in state" :key="x" flex="~" items-center justify-center>
       <MineBlock
-        v-for="block, y in row" :key="y"
-        :block="block"
+        v-for="block, y in row" :key="y" :block="block"
         @click="play.onClick(block)"
         @contextmenu.prevent="play.onRightClick(block)"
       />
@@ -26,6 +29,9 @@ const state = play.state
     </button>
     <button btn @click="play.reset()">
       RESET
+    </button>
+    <button btn>
+      {{ play.state.value.gameState }}
     </button>
   </div>
 </template>
