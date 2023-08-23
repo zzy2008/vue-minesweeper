@@ -5,6 +5,7 @@
     "build": "vite build",
     "dev": "vite --port 3333 --open",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.5",
     "@iconify-json/carbon": "^1.1.17",
+    "@iconify-json/mdi": "^1.1.54",
     "@types/node": "^20.2.5",
     "@unocss/eslint-config": "^0.53.0",
     "@unocss/reset": "^0.53.0",
