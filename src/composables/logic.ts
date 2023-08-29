@@ -11,10 +11,13 @@ const directions = [
   [0, 1],
 ]
 
+type GameStatus = 'play' | 'won' | 'lost'
 interface GameState {
   board: BlockState[][]
   mineGenerated: boolean
-  gameState: 'play' | 'won' | 'lost'
+  status: GameStatus
+  startMS: number
+  endMS?: number
 }
 export class GamePlay {
   state = ref() as Ref<GameState>
@@ -36,11 +39,19 @@ export class GamePlay {
   }
 
   get gameState() {
-    return toRef(this.state.value.gameState)
+    return toRef(this.state.value.status)
   }
 
-  reset() {
+  reset(
+    height = this.height,
+    width = this.width,
+     mines = this.mines,
+  ) {
+    this.height = height
+    this.width = width
+    this.mines = mines
     this.state.value = {
+      startMS: +Date.now(),
       board: Array.from({ length: this.height }, (_, x) =>
         Array.from({ length: this.width },
           (_, y): BlockState => ({
@@ -52,7 +63,7 @@ export class GamePlay {
             mine: false,
           }))),
       mineGenerated: false,
-      gameState: 'play',
+      status: 'play',
     }
   }
 
@@ -65,9 +76,7 @@ export class GamePlay {
       const x = this.random(0, this.height - 1)
       const y = this.random(0, this.width - 1)
       const block = state[x][y]
-      if (Math.abs(block.x - initial.x) < 1)
-        return false
-      if (Math.abs(block.x - initial.x) < 1)
+      if ((Math.abs(block.x - initial.x) < 1) && (Math.abs(block.x - initial.x) < 1))
         return false
       if (block === initial || block.mine)
         return false
@@ -81,24 +90,6 @@ export class GamePlay {
           placed = placeRandom()
       })
 
-    // let mineNum = 0
-    // for (const row of state) {
-    //   for (const block of row) {
-    //     if (Math.abs(block.x - initial.x) < 1)
-    //       continue
-
-    //     if (Math.abs(block.x - initial.x) < 1)
-    //       continue
-
-    //     block.mine = Math.random() < 0.1
-    //     mineNum += block.mine ? 1 : 0
-    //   }
-    // }
-    // // when 0 mine generated, regenerate mines
-    // if (mineNum === 0)
-    //   this.generateMines(state, initial)
-
-    // else
     this.updateNumbers()
   }
 
@@ -131,7 +122,7 @@ export class GamePlay {
       return
     this.getSiblings(block)
       .forEach((s) => {
-        if (!s.revealed) {
+        if (!s.revealed && !s.flagged) {
           s.revealed = true
           this.expandZero(s)
         }
@@ -139,7 +130,7 @@ export class GamePlay {
   }
 
   showAllMines() {
-    if (this.state.value.gameState === 'lost') {
+    if (this.state.value.status === 'lost') {
       this.board.forEach((row) => {
         row.forEach((block) => {
           if (block.mine)
@@ -150,7 +141,7 @@ export class GamePlay {
   }
 
   onRightClick(block: BlockState) {
-    if (this.state.value.gameState !== 'play')
+    if (this.state.value.status !== 'play')
       return
     if (block.revealed)
       return
@@ -158,7 +149,7 @@ export class GamePlay {
   }
 
   onClick(block: BlockState) {
-    if (this.state.value.gameState !== 'play')
+    if (this.state.value.status !== 'play')
       return
     if (block.flagged)
       return
@@ -169,8 +160,7 @@ export class GamePlay {
     }
     block.revealed = true
     if (block.mine) {
-      this.state.value.gameState = 'lost'
-      this.showAllMines()
+      this.onGameOver('lost')
       return
     }
     this.expandZero(block)
@@ -195,9 +185,37 @@ export class GamePlay {
       else
         return false
     }))
-      this.state.value.gameState = 'won'
+      this.onGameOver('won')
 
-    // this.gameState.value = 'lost'
+    // else
+    //   this.gameState.value = 'lost'
     this.showAllMines()
+  }
+
+  autoExpand(block: BlockState) {
+    const siblings = this.getSiblings(block)
+    const flags = siblings.reduce((a, b) => a + (b.flagged ? 1 : 0), 0)
+    if (flags === block.adjacentMines) {
+      siblings.forEach((i) => {
+        if (i.flagged)
+          return
+        i.revealed = true
+        this.expandZero(i)
+        if (i.mine)
+          this.onGameOver('lost')
+      })
+    }
+  }
+
+  onGameOver(status: GameStatus) {
+    this.state.value.status = status
+    this.state.value.endMS = +Date.now()
+    if (this.state.value.status === 'lost') {
+      this.showAllMines()
+      setTimeout(() => {
+        // alert('lost')
+        // console.log('lost')
+      }, 10)
+    }
   }
 }
