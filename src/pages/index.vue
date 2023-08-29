@@ -2,7 +2,7 @@
 import { isDev, toggleDev } from '~/composables'
 import { GamePlay } from '~/composables/logic'
 
-const play = new GamePlay(12, 12)
+const play = new GamePlay(5, 5)
 useStorage('vueminesweeper-state', play.state)
 const state = computed(() => play.board)
 watchEffect(() => {

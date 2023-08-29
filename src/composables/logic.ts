@@ -49,6 +49,7 @@ export class GamePlay {
   }
 
   generateMines(state: BlockState[][], initial: BlockState) {
+    let mineNum = 0
     for (const row of state) {
       for (const block of row) {
         if (Math.abs(block.x - initial.x) < 1)
@@ -57,10 +58,16 @@ export class GamePlay {
         if (Math.abs(block.x - initial.x) < 1)
           continue
 
-        block.mine = Math.random() < 0.1
+        block.mine = Math.random() < 0.01
+        mineNum += block.mine ? 1 : 0
       }
     }
-    this.updateNumbers()
+    // when 0 mine generated, regenerate mines
+    if (mineNum === 0)
+      this.generateMines(state, initial)
+
+    else
+      this.updateNumbers()
   }
 
   updateNumbers() {
