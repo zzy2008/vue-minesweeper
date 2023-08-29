@@ -2,7 +2,7 @@
 import { isDev, toggleDev } from '~/composables'
 import { GamePlay } from '~/composables/logic'
 
-const play = new GamePlay(5, 5)
+const play = new GamePlay(16, 16, 48)
 useStorage('vueminesweeper-state', play.state)
 const state = computed(() => play.board)
 watchEffect(() => {
@@ -22,7 +22,7 @@ watchEffect(() => {
       />
     </div>
   </div>
-
+  <div>count: {{ play.blocks.reduce((pre, cur) => pre + (cur.mine ? 1 : 0), 0) }}</div>
   <div flex="~ gap-1 justify-center">
     <button btn @click="toggleDev()">
       {{ isDev ? 'DEV' : 'NORMAL' }}

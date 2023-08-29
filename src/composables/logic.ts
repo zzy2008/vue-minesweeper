@@ -19,12 +19,20 @@ interface GameState {
 export class GamePlay {
   state = ref() as Ref<GameState>
 
-  constructor(public width: number, public height: number) {
+  constructor(
+    public width: number,
+    public height: number,
+    public mines: number,
+  ) {
     this.reset()
   }
 
   get board() {
     return this.state.value.board
+  }
+
+  get blocks() {
+    return this.state.value.board.flat() as BlockState[]
   }
 
   get gameState() {
@@ -48,26 +56,50 @@ export class GamePlay {
     }
   }
 
+  random(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1) + min)
+  }
+
   generateMines(state: BlockState[][], initial: BlockState) {
-    let mineNum = 0
-    for (const row of state) {
-      for (const block of row) {
-        if (Math.abs(block.x - initial.x) < 1)
-          continue
-
-        if (Math.abs(block.x - initial.x) < 1)
-          continue
-
-        block.mine = Math.random() < 0.01
-        mineNum += block.mine ? 1 : 0
-      }
+    const placeRandom = () => {
+      const x = this.random(0, this.height - 1)
+      const y = this.random(0, this.width - 1)
+      const block = state[x][y]
+      if (Math.abs(block.x - initial.x) < 1)
+        return false
+      if (Math.abs(block.x - initial.x) < 1)
+        return false
+      if (block === initial || block.mine)
+        return false
+      block.mine = true
+      return true
     }
-    // when 0 mine generated, regenerate mines
-    if (mineNum === 0)
-      this.generateMines(state, initial)
+    Array.from ({ length: this.mines }, () => null)
+      .forEach(() => {
+        let placed = false
+        while (!placed)
+          placed = placeRandom()
+      })
 
-    else
-      this.updateNumbers()
+    // let mineNum = 0
+    // for (const row of state) {
+    //   for (const block of row) {
+    //     if (Math.abs(block.x - initial.x) < 1)
+    //       continue
+
+    //     if (Math.abs(block.x - initial.x) < 1)
+    //       continue
+
+    //     block.mine = Math.random() < 0.1
+    //     mineNum += block.mine ? 1 : 0
+    //   }
+    // }
+    // // when 0 mine generated, regenerate mines
+    // if (mineNum === 0)
+    //   this.generateMines(state, initial)
+
+    // else
+    this.updateNumbers()
   }
 
   updateNumbers() {
