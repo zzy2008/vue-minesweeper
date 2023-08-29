@@ -30,7 +30,7 @@ watchEffect(() => {
     <button btn @click="play.reset()">
       RESET
     </button>
-    <button btn>
+    <button hover:disabled focus:pointer-event-none cursor-default btn>
       {{ play.state.value.gameState }}
     </button>
   </div>
