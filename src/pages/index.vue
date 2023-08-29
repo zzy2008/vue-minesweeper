@@ -60,7 +60,7 @@ watchEffect(() => {
   <div w-full overflow-auto p5 @contextmenu.prevent>
     <div
       v-for="row, x in state" :key="x" flex="~"
-      items-center justify-center
+      ma w-max items-center justify-center
     >
       <MineBlock
         v-for="block, y in row"
