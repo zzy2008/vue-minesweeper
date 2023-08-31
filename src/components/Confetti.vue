@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// @ts-expect-error - this is a hack to get the types to work
 import confetti from 'canvas-confetti'
 
 const props = defineProps<{
